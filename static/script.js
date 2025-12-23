@@ -277,7 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.valid) {
                 setValidState(data.message, data.barcode);
             } else {
-                setInvalidState(data.message);
+                let msg = data.message;
+                if (data.expected) {
+                    msg += ` Did you mean ends with ${data.expected}?`;
+                }
+                setInvalidState(msg);
             }
 
         } catch (error) {
