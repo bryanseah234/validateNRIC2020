@@ -353,5 +353,33 @@ p.subtitle {
     min-height: 150px;
     /* Match wheel height for consistency */
     align-items: center;
-    /* Center inputs vertically */
+}
+
+@media (max-width: 450px) {
+    .manual-input {
+        width: 32px !important;
+        height: 32px !important;
+        flex: 0 0 32px !important;
+        max-width: 32px !important;
+        min-width: 32px !important;
+        font-size: 1.1rem;
+    }
+
+    .manual-group-container {
+        gap: 0.25rem;
+        /* Tighter gap */
+    }
+
+    .container {
+        padding: 1.5rem 1rem;
+        /* Less padding */
+        width: 100%;
+        border-radius: 0;
+        /* Full width feel */
+    }
+}
+
+border-radius: 0;
+/* Full width feel */
+}
 }

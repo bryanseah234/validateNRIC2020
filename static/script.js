@@ -88,8 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const input = document.querySelector(`.hybrid-input[data-index="${wheelIndex}"]`);
         const manualInput = document.querySelector(`.manual-input[data-index="${wheelIndex}"]`);
 
+        if (!wheel) return; // Safety check
+
         const val = getSelectedValue(wheel);
-        input.value = val;
+        if (input) input.value = val;
         if (manualInput) manualInput.value = val;
     };
 
@@ -145,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => { isManualScrolling = false; }, 50);
 
                 // Auto-advance focus
-                if (val && index < 8) {
+                if (val && !isNaN(parseInt(index)) && parseInt(index) < 8) {
                     const nextInput = document.querySelector(`.hybrid-input[data-index="${parseInt(index) + 1}"]`);
                     if (nextInput) nextInput.focus();
                 }
@@ -159,14 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // So value should be always correct.
 
         input.addEventListener('focus', (e) => {
-            e.target.select(); // Auto-select text so typing replaces it
+            e.target.select();
         });
 
         // Handle Backspace to go back
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' && !e.target.value) {
                 const index = input.getAttribute('data-index');
-                if (index > 0) {
+                if (parseInt(index) > 0) {
                     const prevInput = document.querySelector(`.hybrid-input[data-index="${parseInt(index) - 1}"]`);
                     if (prevInput) prevInput.focus();
                 }
@@ -177,9 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Manual Input Type -> Update Wheel
     manualInputs.forEach(mInput => {
         mInput.addEventListener('input', (e) => {
+            console.log('Manual input triggered:', mInput.getAttribute('data-index'), e.target.value); // DEBUG
+
             e.target.value = e.target.value.toUpperCase(); // Force upper
             const val = e.target.value;
-            const index = mInput.getAttribute('data-index');
+            const index = parseInt(mInput.getAttribute('data-index'));
 
             // Sync to Wheel System
             const wheel = document.getElementById(`wheel-${index}`);
@@ -187,23 +191,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (hInput) hInput.value = val;
 
-            // Logic repeated from syncAllToWheels
-            const items = Array.from(wheel.querySelectorAll('.wheel-item'));
-            const total = items.length;
-            const oneSetLength = total / 5;
+            if (wheel) {
+                // Logic repeated from syncAllToWheels
+                const items = Array.from(wheel.querySelectorAll('.wheel-item'));
+                const total = items.length;
+                const oneSetLength = total / 5;
 
-            const firstSet = items.slice(0, oneSetLength);
-            const relativeItem = firstSet.find(item => item.getAttribute('data-value') === val);
+                const firstSet = items.slice(0, oneSetLength);
+                const relativeItem = firstSet.find(item => item.getAttribute('data-value') === val);
 
-            if (relativeItem) {
-                const relativeIndex = firstSet.indexOf(relativeItem);
-                const targetIndex = (oneSetLength * 2) + relativeIndex;
-                wheel.scrollTop = targetIndex * 40;
+                if (relativeItem) {
+                    const relativeIndex = firstSet.indexOf(relativeItem);
+                    const targetIndex = (oneSetLength * 2) + relativeIndex;
+                    wheel.scrollTop = targetIndex * 40;
+                }
             }
 
             // Auto-focus next
-            if (val && index < 8) {
-                const next = document.querySelector(`.manual-input[data-index="${parseInt(index) + 1}"]`);
+            if (val && !isNaN(index) && index < 8) {
+                const nextIndex = index + 1;
+                const next = document.querySelector(`.manual-input[data-index="${nextIndex}"]`);
+                console.log('Trying to focus next:', nextIndex, next); // DEBUG
                 if (next) next.focus();
             }
         });
@@ -211,9 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Backspace
         mInput.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' && !e.target.value) {
-                const index = mInput.getAttribute('data-index');
+                const index = parseInt(mInput.getAttribute('data-index'));
                 if (index > 0) {
-                    const prev = document.querySelector(`.manual-input[data-index="${parseInt(index) - 1}"]`);
+                    const prev = document.querySelector(`.manual-input[data-index="${index - 1}"]`);
                     if (prev) prev.focus();
                 }
             }
@@ -269,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (nric.length !== 9) {
             // Should not happen with fixed wheels, but good sanity check
+            setInvalidState(`Please enter all 9 characters. Current: ${nric.length}`);
             return;
         }
 
