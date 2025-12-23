@@ -22,6 +22,21 @@ document.addEventListener('DOMContentLoaded', () => {
             statusMessage.textContent = '';
             statusMessage.className = 'status-message';
 
+            // Reset barcode displays (for edge case: switching after validation)
+            const wheelBarcodeDisplay = document.getElementById('barcodeActiveDisplay');
+            if (wheelBarcodeDisplay) {
+                wheelBarcodeDisplay.style.display = 'none';
+                wheelBarcodeDisplay.innerHTML = '';
+            }
+            const manualBarcodeDisplay = document.getElementById('barcodeActiveDisplayManual');
+            if (manualBarcodeDisplay) {
+                manualBarcodeDisplay.style.display = 'none';
+                manualBarcodeDisplay.innerHTML = '';
+            }
+
+            // Reset button to "Validate"
+            validateBtn.textContent = 'Validate';
+
             // Switch View
             const target = tab.getAttribute('data-tab');
             currentMode = target;
@@ -29,12 +44,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (target === 'wheel') {
                 document.getElementById('wheel-view').style.display = 'block';
+                // Show wheel wrappers and overlay
+                document.querySelectorAll('.wheel-wrapper').forEach(el => {
+                    el.style.display = 'block';
+                    el.style.visibility = 'visible';
+                });
+                const overlay = document.getElementById('wheelOverlay');
+                if (overlay) overlay.style.display = 'block';
                 // Sync Manual -> Wheel (in case user typed in manual)
                 syncAllToWheels();
             } else {
                 document.getElementById('manual-view').style.display = 'block';
-                // Clear manual inputs so user starts fresh with placeholders
-                manualInputs.forEach(input => input.value = '');
+                // Show and clear manual inputs so user starts fresh with placeholders
+                manualInputs.forEach(input => {
+                    input.style.display = 'block';
+                    input.value = '';
+                });
             }
         });
     });
