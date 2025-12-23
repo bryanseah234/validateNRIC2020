@@ -1,0 +1,153 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --primary-color: #14b8a6; /* Teal */
+    --accent-color: #2dd4bf; 
+    --text-color: #f8fafc;
+    --muted-color: #94a3b8;
+    --error-color: #ef4444;
+    --success-color: #22c55e; /* Neon Green */
+    --input-bg: #334155;
+    --input-focus: #0f766e;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: var(--card-bg);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    max-width: 600px;
+    width: 90%;
+    border: 1px solid #334155;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.logo-container {
+    margin-bottom: 2rem;
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(20, 184, 166, 0.4);
+}
+
+h1 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(to right, var(--primary-color), var(--success-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.5rem;
+}
+
+p.subtitle {
+    color: var(--muted-color);
+    margin-bottom: 2.5rem;
+}
+
+.nric-inputs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap; /* allow wrapping on small screens if needed, though 9 chars usually fit */
+}
+
+.nric-char {
+    width: 45px;
+    height: 60px;
+    font-size: 1.5rem;
+    text-align: center;
+    background-color: var(--input-bg);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    color: var(--text-color);
+    outline: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.nric-char:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);
+    transform: translateY(-2px);
+}
+
+.nric-char.valid {
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.nric-char.invalid {
+    border-color: var(--error-color);
+    color: var(--error-color);
+}
+
+#result-container {
+    margin-top: 2rem;
+    min-height: 120px;
+    transition: opacity 0.3s;
+}
+
+.status-message {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.valid-text {
+    color: var(--success-color);
+    text-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+}
+
+.invalid-text {
+    color: var(--error-color);
+}
+
+.barcode-wrapper {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.barcode-wrapper img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Spin animation for loading state if needed */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

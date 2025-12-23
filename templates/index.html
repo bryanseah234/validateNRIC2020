@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validate NRIC</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+        </div>
+        <h1>Validate NRIC</h1>
+        <p class="subtitle">Enter your NRIC number to verify validity</p>
+
+        <div class="nric-input-group" id="nricForm">
+            <div class="nric-inputs">
+                <input type="text" class="nric-char" maxlength="1" data-index="0" autofocus placeholder="S">
+                <input type="text" class="nric-char" maxlength="1" data-index="1" pattern="\d*">
+                <input type="text" class="nric-char" maxlength="1" data-index="2" pattern="\d*">
+                <input type="text" class="nric-char" maxlength="1" data-index="3" pattern="\d*">
+                <input type="text" class="nric-char" maxlength="1" data-index="4" pattern="\d*">
+                <input type="text" class="nric-char" maxlength="1" data-index="5" pattern="\d*">
+                <input type="text" class="nric-char" maxlength="1" data-index="6" pattern="\d*">
+                <input type="text" class="nric-char" maxlength="1" data-index="7" pattern="\d*">
+                <input type="text" class="nric-char" maxlength="1" data-index="8" placeholder="A">
+            </div>
+        </div>
+
+        <div id="result-container">
+            <div id="statusMessage" class="status-message"></div>
+            <div id="barcodeDisplay" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
