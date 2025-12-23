@@ -27,7 +27,10 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    max-height: 100vh;
     margin: 0;
+    overflow: hidden;
+    /* Hide scrollbar */
 }
 
 .container {
