@@ -1,3 +1,8 @@
+html {
+    height: 100%;
+    background-color: #f3f4f6;
+}
+
 :root {
     --bg-color: #f3f4f6;
     /* Light Grey */
@@ -26,9 +31,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    max-height: 100vh;
+    height: 100%;
+    min-height: 100%;
     margin: 0;
+    padding: 0;
     overflow: hidden;
     /* Hide scrollbar */
 }
@@ -382,19 +388,90 @@ p.subtitle {
 
     .manual-group-container {
         gap: 0.25rem;
-        /* Tighter gap */
     }
 
     .container {
-        padding: 1.5rem 1rem;
-        /* Less padding */
+        padding: 1rem 0.75rem;
         width: 100%;
         border-radius: 0;
-        /* Full width feel */
+        max-height: 100vh;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    p.subtitle {
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .logo-container img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .logo-container {
+        margin-bottom: 0.75rem;
+    }
+
+    .wheel-group-container {
+        height: 120px;
+        margin-bottom: 1rem;
+    }
+
+    .action-button {
+        padding: 10px 40px;
+        font-size: 0.9rem;
+    }
+
+    .tab-button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .tab-container {
+        margin-bottom: 1rem;
     }
 }
 
-border-radius: 0;
-/* Full width feel */
-}
+/* Extra small screens */
+@media (max-height: 600px) {
+    .container {
+        padding: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.3rem;
+        margin-bottom: 0.25rem;
+    }
+
+    p.subtitle {
+        margin-bottom: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .logo-container {
+        margin-bottom: 0.5rem;
+    }
+
+    .logo-container img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .wheel-group-container {
+        height: 100px;
+        margin-bottom: 0.5rem;
+    }
+
+    .wheel-item {
+        line-height: 30px;
+        height: 30px;
+    }
+
+    .action-button {
+        padding: 8px 30px;
+        margin-top: 0.5rem;
+    }
 }
