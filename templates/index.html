@@ -21,6 +21,16 @@
         <div class="wheel-group-container">
             <div class="selection-overlay" id="wheelOverlay"></div>
 
+            <!-- Hybrid Input Overlay: Inputs situated exactly over the center of each wheel -->
+            <div class="hybrid-input-overlay" id="hybridOverlay">
+                <!-- Use same structure/count as wheels -->
+                <input type="text" class="hybrid-input" data-index="0" maxlength="1">
+                {% for i in range(1, 8) %}
+                <input type="text" class="hybrid-input" data-index="{{ i }}" maxlength="1">
+                {% endfor %}
+                <input type="text" class="hybrid-input" data-index="8" maxlength="1">
+            </div>
+
             <div id="barcodeActiveDisplay" class="barcode-active-display"></div>
 
             <!-- Wheel 1: Prefix -->

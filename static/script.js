@@ -5,15 +5,101 @@ document.addEventListener('DOMContentLoaded', () => {
     const barcodeDisplay = document.getElementById('barcodeDisplay');
 
     // Intersection Observer to detect which item is selected (centered)
-    const observerOptions = {
-        root: null, // relative to viewport, but inside the scroll container it works if we target children
-        rootMargin: '-50% 0px -50% 0px', // check center line
-        threshold: 0
+    // Actually we use scrollTop.
+
+    const hybridInputs = document.querySelectorAll('.hybrid-input');
+
+    // SYNC: Wheel -> Input
+    // When wheel scrolls, update the input value to match the snapped item.
+    let isManualScrolling = false;
+    let scrollTimeout;
+
+    const updateInputValue = (wheelIndex) => {
+        const wheel = document.getElementById(`wheel-${wheelIndex}`);
+        const input = document.querySelector(`.hybrid-input[data-index="${wheelIndex}"]`);
+        const val = getSelectedValue(wheel);
+        input.value = val;
     };
 
-    // We need to query the state of each wheel when validating.
-    // Instead of complex Observers for live updates, we can just calculate based on scrollTop.
-    // Item height is 40px. Padding is 55px.
+    wheels.forEach((wheel, index) => {
+        // Initial sync
+        updateInputValue(index);
+
+        wheel.addEventListener('scroll', () => {
+            if (isManualScrolling) return; // Ignore scroll events triggered by code
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                updateInputValue(index);
+            }, 100); // Wait for snap
+        });
+
+        // MOUSE SENSITIVITY FIX
+        wheel.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY;
+            // Reduce sensitivity: move partial amount
+            // Or move exactly one item per tick?
+            // "Too sensitive" implies it flies too fast.
+            // Let's dampen it div by 5.
+            wheel.scrollTop += delta / 3;
+        });
+    });
+
+    // SYNC: Input -> Wheel
+    hybridInputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            const val = e.target.value.toUpperCase();
+            const index = input.getAttribute('data-index');
+            const wheel = document.getElementById(`wheel-${index}`);
+
+            // Find item with this value
+            const items = Array.from(wheel.querySelectorAll('.wheel-item'));
+            const targetItem = items.find(item => item.getAttribute('data-value') === val);
+
+            if (targetItem) {
+                isManualScrolling = true;
+                // Calculate scroll position
+                // item offsetTop is relative to parent if positioned? 
+                // wheel-padding is first child. 
+                // index matches item index.
+                const itemIndex = items.indexOf(targetItem);
+                const itemHeight = 40;
+                wheel.scrollTop = itemIndex * itemHeight;
+
+                setTimeout(() => { isManualScrolling = false; }, 50);
+
+                // Auto-advance focus
+                if (val && index < 8) {
+                    const nextInput = document.querySelector(`.hybrid-input[data-index="${parseInt(index) + 1}"]`);
+                    if (nextInput) nextInput.focus();
+                }
+            }
+        });
+
+        input.addEventListener('focus', (e) => {
+            // Optional: Highlight wheel
+        });
+
+        // Handle Backspace to go back
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value) {
+                const index = input.getAttribute('data-index');
+                if (index > 0) {
+                    const prevInput = document.querySelector(`.hybrid-input[data-index="${parseInt(index) - 1}"]`);
+                    if (prevInput) prevInput.focus();
+                }
+            }
+        });
+    });
+
+    // Validating NRIC update to use inputs directly? 
+    // Or keep using wheels? Input and Wheel should be in sync, so either is fine.
+    // Let's keep logic reading from Wheels to be safe, or read from inputs.
+    // Reading from wheels allows invalid visual states to be "valid" in code if we are not careful.
+    // But since input drives wheel scroll, the wheel should be correct.
+
+    // Helper to get selected value from a wheel
 
     // Helper to get selected value from a wheel
     function getSelectedValue(wheel) {
@@ -85,6 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
             wheels.forEach(w => w.style.display = 'none');
             const overlay = document.getElementById('wheelOverlay');
             if (overlay) overlay.style.display = 'none';
+            // Hide hybrid inputs too
+            document.getElementById('hybridOverlay').style.display = 'none';
 
             const startDisplay = document.getElementById('barcodeActiveDisplay');
             if (startDisplay) {
@@ -136,6 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         wheels.forEach(w => w.style.display = 'block');
         const overlay = document.getElementById('wheelOverlay');
         if (overlay) overlay.style.display = 'block';
+        document.getElementById('hybridOverlay').style.display = 'flex';
 
         statusMessage.textContent = '';
         statusMessage.className = 'status-message';
