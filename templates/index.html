@@ -18,51 +18,80 @@
         <h1>Validate NRIC</h1>
         <p class="subtitle">Select your NRIC number using the wheels</p>
 
-        <div class="wheel-group-container">
-            <div class="selection-overlay" id="wheelOverlay"></div>
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <button class="tab-button active" data-tab="wheel">Scroll Wheel</button>
+            <button class="tab-button" data-tab="manual">Manual Input</button>
+        </div>
 
-            <!-- Hybrid Input Overlay: Inputs situated exactly over the center of each wheel -->
-            <div class="hybrid-input-overlay" id="hybridOverlay">
-                <!-- Use same structure/count as wheels -->
-                <input type="text" class="hybrid-input" data-index="0" maxlength="1">
+        <!-- View 1: Scroll Wheels (Existing) -->
+        <div id="wheel-view" class="input-view active-view">
+            <div class="wheel-group-container" id="wheelGroup">
+
+                <div id="barcodeActiveDisplay" class="barcode-active-display"></div>
+
+                <div class="selection-overlay" id="wheelOverlay"></div>
+
+                <!-- Wheel 1: Prefix -->
+                <div class="wheel-wrapper">
+                    <input type="text" class="hybrid-input wheel-input-sync" data-index="0" maxlength="1">
+                    <div class="wheel-column" id="wheel-0" data-index="0">
+                        <div class="wheel-padding"></div>
+                        <div class="wheel-item" data-value="S">S</div>
+                        <div class="wheel-item" data-value="T">T</div>
+                        <div class="wheel-item" data-value="F">F</div>
+                        <div class="wheel-item" data-value="G">G</div>
+                        <div class="wheel-item" data-value="M">M</div>
+                        <div class="wheel-padding"></div>
+                    </div>
+                </div>
+
+                <!-- Wheels 2-8: Digits -->
                 {% for i in range(1, 8) %}
-                <input type="text" class="hybrid-input" data-index="{{ i }}" maxlength="1">
+                <div class="wheel-wrapper">
+                    <input type="text" class="hybrid-input wheel-input-sync" data-index="{{ i }}" maxlength="1">
+                    <div class="wheel-column" id="wheel-{{ i }}" data-index="{{ i }}">
+                        <div class="wheel-padding"></div>
+                        {% for d in range(10) %}
+                        <div class="wheel-item" data-value="{{ d }}">{{ d }}</div>
+                        {% endfor %}
+                        <div class="wheel-padding"></div>
+                    </div>
+                </div>
                 {% endfor %}
-                <input type="text" class="hybrid-input" data-index="8" maxlength="1">
+
+                <!-- Wheel 9: Suffix -->
+                <div class="wheel-wrapper">
+                    <input type="text" class="hybrid-input wheel-input-sync" data-index="8" maxlength="1">
+                    <div class="wheel-column" id="wheel-8" data-index="8">
+                        <div class="wheel-padding"></div>
+                        {% for char in "ABCDEGHIJKLMNOPQRSTUVWXYZ" %}
+                        <div class="wheel-item" data-value="{{ char }}">{{ char }}</div>
+                        {% endfor %}
+                        <div class="wheel-padding"></div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div id="barcodeActiveDisplay" class="barcode-active-display"></div>
-
-            <!-- Wheel 1: Prefix -->
-            <div class="wheel-column" id="wheel-0" data-index="0">
-                <div class="wheel-padding"></div>
-                <div class="wheel-item" data-value="S">S</div>
-                <div class="wheel-item" data-value="T">T</div>
-                <div class="wheel-item" data-value="F">F</div>
-                <div class="wheel-item" data-value="G">G</div>
-                <div class="wheel-item" data-value="M">M</div>
-                <div class="wheel-padding"></div>
-            </div>
-
-            <!-- Wheels 2-8: Digits -->
-            {% for i in range(1, 8) %}
-            <div class="wheel-column" id="wheel-{{ i }}" data-index="{{ i }}">
-                <div class="wheel-padding"></div>
-                {% for d in range(10) %}
-                <div class="wheel-item" data-value="{{ d }}">{{ d }}</div>
+        <!-- View 2: Manual OTP Input -->
+        <div id="manual-view" class="input-view" style="display: none;">
+            <div class="manual-group-container">
+                <!-- Independent Manual Inputs -->
+                <input type="text" class="manual-input manual-input-sync" data-index="0" maxlength="1" placeholder="S">
+                {% for i in range(1, 8) %}
+                <input type="text" class="manual-input manual-input-sync safe-numeric" data-index="{{ i }}"
+                    maxlength="1" placeholder="0">
                 {% endfor %}
-                <div class="wheel-padding"></div>
+                <input type="text" class="manual-input manual-input-sync" data-index="8" maxlength="1" placeholder="A">
             </div>
-            {% endfor %}
-
-            <!-- Wheel 9: Suffix -->
-            <div class="wheel-column" id="wheel-8" data-index="8">
-                <div class="wheel-padding"></div>
-                {% for char in "ABCDEGHIJKLMNOPQRSTUVWXYZ" %}
-                <div class="wheel-item" data-value="{{ char }}">{{ char }}</div>
-                {% endfor %}
-                <div class="wheel-padding"></div>
-            </div>
+            <!-- Barcode Display for Manual View (Or we toggle the main one? Better to reuse a common result area or swap views) -->
+            <!-- User said "Ending screen shld be the same for both views" -->
+            <!-- So we will use the common Result container or overlay the manual inputs too. -->
+            <!-- Since Wheel view has an embedded barcode display inside 'wheelGroup', we might want to replicate that or move it out. -->
+            <!-- Moving it out is cleaner but user liked it 'filling the rectangle'. -->
+            <!-- Let's put a similar barcode container inside manual-group-container for consistency. -->
+            <div id="barcodeActiveDisplayManual" class="barcode-active-display" style="display:none;"></div>
         </div>
 
         <button id="validateBtn" class="action-button">Validate</button>

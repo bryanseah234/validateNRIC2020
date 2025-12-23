@@ -136,64 +136,69 @@ p.subtitle {
 /* (Container Height - Item Height) / 2 = (150 - 40) / 2 = 55 */
 }
 
-/* Hybrid Input Styles */
-.hybrid-input-overlay {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 40px;
-    margin-top: -20px;
-    display: flex;
-    justify-content: center;
-    z-index: 15;
-    /* Above wheels (5) and overlay (10) */
-    pointer-events: none;
-    /* Allow clicks to pass through initially? No, we want to click inputs. */
-    pointer-events: auto;
+.wheel-wrapper {
+    position: relative;
+    width: 40px;
+    height: 100%;
+    margin: 0 2px;
+    /* Slight spacing between wheels if needed, or 0 */
 }
 
 .hybrid-input {
-    width: 40px;
-    /* Match wheel column width */
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
     height: 40px;
     background: transparent;
     border: none;
+    /* User might want a border? "input boxes will still be there" */
+    /* Let's give a subtle border that appears on hover/focus or always? */
+    /* To mimic "OTP input boxes", let's make them look like boxes. */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+
     text-align: center;
     font-size: 1.25rem;
     font-weight: 600;
     color: transparent;
-    /* Text hidden to show wheel text behind it, until focused? */
-    /* User said "click the space and the 'OTP' input boxes will still be there". 
-       So maybe they should be visible inputs?
-       "merge the 2 design" -> seeing the wheel is nice. 
-       If I make text transparent, user sees wheel item. 
-       If user types, we update wheel.
-       If I make text colored, it overlays the wheel text which might look messy (pseudo-bold).
-       Let's keep text transparent but caret visible? 
-       Or better: make text color transparent, but when focused, make wheel item transparent? 
-       Actually, if we sync perfectly, the text will overlay perfectly.
-       Let's try: Text transparent. Caret visible (caret-color: black).
-    */
+    /* Keep transparent to show wheel behind? */
+    /* If I add a border/background, it might obscure the wheel. */
+    /* If I make it transparent, seeing the wheel is good. */
+    /* BUT if user focuses, maybe we show the text? */
+    /* User said "input should be overlayed... so user can scroll... or tap inside... to manually type" */
+    /* "merge the 2 design" */
+
     color: transparent;
-    caret-color: var(--primary-color);
+    caret-color: var(--text-color);
     outline: none;
-    cursor: text;
-    text-transform: uppercase;
+    z-index: 20;
+    /* Above wheel */
     padding: 0;
     margin: 0;
 }
 
 .hybrid-input:focus {
-    /* Maybe show a subtle border to indicate manual mode active */
-    /* border: 1px solid var(--primary-color); */
-    /* border-radius: 4px; */
+    color: var(--text-color);
+    /* Show text when typing */
+    background: var(--card-bg);
+    /* Opaque background when focused to read clearly? */
+    border-color: var(--text-color);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
+
+.hybrid-input::selection {
+    background: rgba(0, 0, 0, 0.1);
+}
+
 
 /* Media query adjustment for input width too */
 @media (max-width: 500px) {
-    .hybrid-input {
+    .wheel-wrapper {
         width: 32px;
+    }
+
+    .hybrid-input {
         font-size: 1rem;
     }
 }
@@ -256,6 +261,75 @@ p.subtitle {
     filter: grayscale(100%);
     /* Monochromatic barcode */
 }
+
+/* Tab Navigation */
+.tab-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background: #e5e7eb;
+    padding: 4px;
+    border-radius: 12px;
+    display: inline-flex;
+    /* Contain it */
+}
+
+.tab-button {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--muted-color);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.tab-button.active {
+    background: white;
+    color: var(--text-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Manual Input View */
+.manual-group-container {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    /* For barcode overlay */
+    min-height: 80px;
+    /* Ensure space */
+}
+
+.manual-input {
+    width: 40px;
+    height: 50px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.manual-input:focus {
+    border-color: var(--text-color);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    outline: none;
+}
+
+/* Ensure barcode displays cover their respective containers */
+.input-view {
+    position: relative;
+    width: 100%;
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 500px) {

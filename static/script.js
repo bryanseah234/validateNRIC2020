@@ -7,18 +7,83 @@ document.addEventListener('DOMContentLoaded', () => {
     // Intersection Observer to detect which item is selected (centered)
     // Actually we use scrollTop.
 
-    const hybridInputs = document.querySelectorAll('.hybrid-input');
+    // TAB LOGIC
+    const tabs = document.querySelectorAll('.tab-button');
+    const views = document.querySelectorAll('.input-view');
+    let currentMode = 'wheel'; // 'wheel' or 'manual'
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Switch Tab UI
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Switch View
+            const target = tab.getAttribute('data-tab');
+            currentMode = target;
+            views.forEach(v => v.style.display = 'none');
+
+            if (target === 'wheel') {
+                document.getElementById('wheel-view').style.display = 'block';
+                // Sync Manual -> Wheel (in case user typed in manual)
+                syncAllToWheels();
+            } else {
+                document.getElementById('manual-view').style.display = 'block';
+                // Wheel inputs are already synced to wheel data, need to sync Wheel -> Manual
+                syncAllToManual();
+            }
+        });
+    });
+
+    const hybridInputs = document.querySelectorAll('.hybrid-input'); // Inputs inside wheels
+    const manualInputs = document.querySelectorAll('.manual-input'); // Inputs in manual view
+
+    // DATA SYNC LOGIC
+    // We have a 'master' state effectively.
+    // When Wheel moves -> Updates Hybrid Input -> Should Update Manual Input?
+    // When Manual Input types -> Should Update Hybrid Input + Wheel?
+    // Yes, keep them in sync.
+
+    function syncAllToManual() {
+        // Copy values from Hybrid Inputs (which reflect wheels) to Manual Inputs
+        hybridInputs.forEach((hInput, i) => {
+            manualInputs[i].value = hInput.value;
+        });
+    }
+
+    function syncAllToWheels() {
+        // Copy values from Manual Inputs to Wheels (and Hybrid Inputs)
+        manualInputs.forEach((mInput, i) => {
+            const val = mInput.value.toUpperCase();
+            if (val) {
+                const wheel = document.getElementById(`wheel-${i}`);
+                // Find item
+                const items = Array.from(wheel.querySelectorAll('.wheel-item'));
+                const targetItem = items.find(item => item.getAttribute('data-value') === val);
+                if (targetItem) {
+                    const itemIndex = items.indexOf(targetItem);
+                    wheel.scrollTop = itemIndex * 40;
+                    hybridInputs[i].value = val;
+                }
+            }
+        });
+    }
 
     // SYNC: Wheel -> Input
     // When wheel scrolls, update the input value to match the snapped item.
     let isManualScrolling = false;
     let scrollTimeout;
 
+    // LISTENER UPDATES
+    // 1. Wheel Scroll -> Updates Hybrid Input (Existing) -> Add Sync to Manual
     const updateInputValue = (wheelIndex) => {
         const wheel = document.getElementById(`wheel-${wheelIndex}`);
         const input = document.querySelector(`.hybrid-input[data-index="${wheelIndex}"]`);
+        const manualInput = document.querySelector(`.manual-input[data-index="${wheelIndex}"]`);
+
         const val = getSelectedValue(wheel);
         input.value = val;
+        if (manualInput) manualInput.value = val;
     };
 
     wheels.forEach((wheel, index) => {
@@ -52,6 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = e.target.value.toUpperCase();
             const index = input.getAttribute('data-index');
             const wheel = document.getElementById(`wheel-${index}`);
+            const manualInput = document.querySelector(`.manual-input[data-index="${index}"]`);
+
+            if (manualInput) manualInput.value = val; // Sync to manual
 
             // Find item with this value
             const items = Array.from(wheel.querySelectorAll('.wheel-item'));
@@ -77,8 +145,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // When focusing, we might want to ensure the input shows the current wheel value if it was empty?
+        // Or if it's transparent, it effectively shows it. 
+        // But if we have opaque background on focus, we MUST populate value.
+        // The updateInputValue function does this on scroll.
+        // So value should be always correct.
+
         input.addEventListener('focus', (e) => {
-            // Optional: Highlight wheel
+            e.target.select(); // Auto-select text so typing replaces it
         });
 
         // Handle Backspace to go back
@@ -93,13 +167,66 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // 3. Manual Input Type -> Update Wheel + Hybrid
+    manualInputs.forEach(mInput => {
+        mInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase(); // Force upper
+            const val = e.target.value;
+            const index = mInput.getAttribute('data-index');
+
+            // Sync to Wheel System
+            const wheel = document.getElementById(`wheel-${index}`);
+            const hInput = document.querySelector(`.hybrid-input[data-index="${index}"]`);
+
+            if (hInput) hInput.value = val;
+
+            // Find item
+            const items = Array.from(wheel.querySelectorAll('.wheel-item'));
+            const targetItem = items.find(item => item.getAttribute('data-value') === val);
+            if (targetItem) {
+                const itemIndex = items.indexOf(targetItem);
+                wheel.scrollTop = itemIndex * 40;
+            }
+
+            // Auto-focus next
+            if (val && index < 8) {
+                const next = document.querySelector(`.manual-input[data-index="${parseInt(index) + 1}"]`);
+                if (next) next.focus();
+            }
+        });
+
+        // Backspace
+        mInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value) {
+                const index = mInput.getAttribute('data-index');
+                if (index > 0) {
+                    const prev = document.querySelector(`.manual-input[data-index="${parseInt(index) - 1}"]`);
+                    if (prev) prev.focus();
+                }
+            }
+        });
+    });
+
     // Validating NRIC update to use inputs directly? 
     // Or keep using wheels? Input and Wheel should be in sync, so either is fine.
-    // Let's keep logic reading from Wheels to be safe, or read from inputs.
-    // Reading from wheels allows invalid visual states to be "valid" in code if we are not careful.
-    // But since input drives wheel scroll, the wheel should be correct.
+    // However, when a view is hidden (display: none), scrollTop might be 0 or unreliable on some browsers/versions.
+    // So we should read from the inputs which are reliable in DOM.
+    // Since we sync wheel<->hybrid<->manual, reading from hybridInputs is safe if in wheel mode,
+    // and reading from manualInputs is safe if in manual mode.
 
-    // Helper to get selected value from a wheel
+    // Helper to collect NRIC
+    function collectNRIC() {
+        let nric = '';
+        if (currentMode === 'wheel') {
+            // Read from hybrid inputs (which are synced from wheels)
+            // Or getSelectedValue from scrollwheels if visible.
+            // Safest: use hybrid inputs values.
+            hybridInputs.forEach(input => nric += input.value);
+        } else {
+            manualInputs.forEach(input => nric += input.value);
+        }
+        return nric;
+    }
 
     // Helper to get selected value from a wheel
     function getSelectedValue(wheel) {
@@ -123,10 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function validateNRIC() {
         // Collect NRIC
-        let nric = '';
-        wheels.forEach(wheel => {
-            nric += getSelectedValue(wheel);
-        });
+        let nric = collectNRIC();
 
         console.log("Validating NRIC:", nric);
 
@@ -167,27 +291,46 @@ document.addEventListener('DOMContentLoaded', () => {
         statusMessage.className = 'status-message valid-text';
 
         if (barcodeUrl) {
-            // UI Swap: Hide Wheels, Show Barcode in their place
-            wheels.forEach(w => w.style.display = 'none');
+            // UI Swap: Hide Wheels/Inputs, Show Barcode
+            // Hide Wheel Wrapper content? 
+            document.querySelectorAll('.wheel-wrapper').forEach(el => el.style.visibility = 'hidden'); // Using visibility to keep layout size? No display none is better.
+            document.querySelectorAll('.wheel-wrapper').forEach(el => el.style.display = 'none');
+
+            // Hide Manual Inputs?
+            document.querySelectorAll('.manual-input').forEach(el => el.style.display = 'none');
+
             const overlay = document.getElementById('wheelOverlay');
             if (overlay) overlay.style.display = 'none';
-            // Hide hybrid inputs too
-            document.getElementById('hybridOverlay').style.display = 'none';
 
-            const startDisplay = document.getElementById('barcodeActiveDisplay');
-            if (startDisplay) {
-                startDisplay.style.display = 'flex';
-                startDisplay.innerHTML = `<img src="${barcodeUrl}" alt="Barcode">`;
+            // Show Barcode in Active View
+            const activeBarcodeId = currentMode === 'wheel' ? 'barcodeActiveDisplay' : 'barcodeActiveDisplayManual';
+            // Actually, simply show both or the correct one.
+            const barcodeHTML = `<img src="${barcodeUrl}" alt="Barcode">`;
+
+            if (currentMode === 'wheel') {
+                const display = document.getElementById('barcodeActiveDisplay');
+                if (display) {
+                    display.style.display = 'flex';
+                    display.innerHTML = barcodeHTML;
+                }
+            } else {
+                const display = document.getElementById('barcodeActiveDisplayManual');
+                if (display) {
+                    display.style.display = 'flex';
+                    display.innerHTML = barcodeHTML;
+                }
             }
+
+            // Lock tabs? User said "Ending screen shld be same". 
+            // If user switches tab while result is showing, what happens?
+            // Reset state? Or show result in other tab?
+            // Let's show result in other tab if they switch.
+            // This is handled by 'click' listener on tab which currently resets views/syncs. 
+            // We might need to handle 'valid state' persistence across tabs.
+            // For now, simplicity: switching tabs resets to input mode.
 
             // Update button
             validateBtn.textContent = 'Repeat';
-
-            // Note: If we use 'removeEventListener' we need the exact function reference.
-            // validateNRIC logic is inside, so we are good.
-            // But we need to handle the click logic cleanly.
-            // Easiest is to check textContent inside the main click handler or swap handlers.
-            // Let's swap the click behavior by flags or just check text.
         }
 
         // Hide bottom display as requested
@@ -214,22 +357,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function resetState() {
-        // Reset UI to Wheel View
-        const startDisplay = document.getElementById('barcodeActiveDisplay');
-        if (startDisplay) {
-            startDisplay.style.display = 'none';
-            startDisplay.innerHTML = '';
+        // Reset UI
+        const wheelDisplay = document.getElementById('barcodeActiveDisplay');
+        if (wheelDisplay) {
+            wheelDisplay.style.display = 'none';
+            wheelDisplay.innerHTML = '';
         }
 
+        const manualDisplay = document.getElementById('barcodeActiveDisplayManual');
+        if (manualDisplay) {
+            manualDisplay.style.display = 'none';
+            manualDisplay.innerHTML = '';
+        }
+
+        // UNHIDE WRAPPERS CORRECTLY
+        document.querySelectorAll('.wheel-wrapper').forEach(el => {
+            el.style.display = 'block';
+            el.style.visibility = 'visible'; // Reset visibility too
+        });
+
         wheels.forEach(w => w.style.display = 'block');
+
+        document.querySelectorAll('.manual-input').forEach(el => el.style.display = 'block');
+
         const overlay = document.getElementById('wheelOverlay');
         if (overlay) overlay.style.display = 'block';
-        document.getElementById('hybridOverlay').style.display = 'flex';
 
         statusMessage.textContent = '';
         statusMessage.className = 'status-message';
 
         validateBtn.textContent = 'Validate';
+
+        // Ensure only active view is shown
+        if (currentMode === 'wheel') {
+            document.getElementById('wheel-view').style.display = 'block';
+            document.getElementById('manual-view').style.display = 'none';
+            syncAllToWheels();
+        } else {
+            document.getElementById('wheel-view').style.display = 'none';
+            document.getElementById('manual-view').style.display = 'block';
+            syncAllToManual();
+        }
     }
 
     // Initial scroll setup
