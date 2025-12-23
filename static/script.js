@@ -427,7 +427,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             document.getElementById('wheel-view').style.display = 'none';
             document.getElementById('manual-view').style.display = 'block';
-            syncAllToManual();
+            // Clear manual inputs so user starts fresh
+            manualInputs.forEach(input => input.value = '');
         }
     }
 

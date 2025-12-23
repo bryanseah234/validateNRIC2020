@@ -82,7 +82,8 @@ p.subtitle {
     position: relative;
     background: linear-gradient(to bottom, #ffffff 0%, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0) 80%, #ffffff 100%);
     border-radius: 12px;
-    border: 1px solid #e5e7eb;
+    border: none;
+    /* No border - cleaner look */
     margin-bottom: 2rem;
     background-color: #f9fafb;
 }
