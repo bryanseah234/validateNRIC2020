@@ -45,10 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Yes, keep them in sync.
 
     function syncAllToManual() {
-        // Copy values from Hybrid Inputs (which reflect wheels) to Manual Inputs
-        hybridInputs.forEach((hInput, i) => {
-            manualInputs[i].value = hInput.value;
-        });
+        // Don't auto-populate - let user type fresh with placeholders visible
+        // If user wants to keep wheel values, they should stay in wheel mode
+        // or we could add a "Copy from wheels" button later
     }
 
     function syncAllToWheels() {

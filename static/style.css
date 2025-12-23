@@ -334,6 +334,17 @@ p.subtitle {
     /* Match container border radius */
 }
 
+/* Constrains the barcode to fit in the input area */
+.input-view {
+    position: relative;
+    min-height: 160px;
+    /* Match the wheel height */
+}
+
+#wheelGroup {
+    position: relative;
+}
+
 .barcode-active-display img {
     width: auto;
     height: auto;
