@@ -218,10 +218,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function collectNRIC() {
         let nric = '';
         if (currentMode === 'wheel') {
-            // Read from hybrid inputs (which are synced from wheels)
-            // Or getSelectedValue from scrollwheels if visible.
-            // Safest: use hybrid inputs values.
-            hybridInputs.forEach(input => nric += input.value);
+            // Read directly from wheels
+            wheels.forEach(wheel => {
+                nric += getSelectedValue(wheel);
+            });
         } else {
             manualInputs.forEach(input => nric += input.value);
         }

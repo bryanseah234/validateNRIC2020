@@ -65,6 +65,13 @@ p.subtitle {
     margin-bottom: 2rem;
 }
 
+/* Padding to center first/last items: (Container 150 - Item 40) / 2 = 55px */
+.wheel-padding {
+    height: 55px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
 /* Wheel Component Styles */
 .wheel-group-container {
     display: flex;
@@ -293,72 +300,41 @@ p.subtitle {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Manual Input View */
+.barcode-active-display {
+    display: none;
+    position: absolute;
+    /* Take over the container space */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    /* Match card background */
+    z-index: 20;
+    border-radius: 12px;
+    /* Match container border radius */
+}
+
+.barcode-active-display img {
+    width: auto;
+    height: auto;
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    /* Use a dark filter if needed, but python-barcode usually outputs black bars */
+}
+
+/* Ensure manual container has height when barcode is shown */
 .manual-group-container {
     display: flex;
     justify-content: center;
     gap: 0.5rem;
     margin-bottom: 2rem;
     position: relative;
-    /* For barcode overlay */
-    min-height: 80px;
-    /* Ensure space */
-}
-
-.manual-input {
-    width: 40px;
-    height: 50px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-color);
-    background: white;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.manual-input:focus {
-    border-color: var(--text-color);
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
-    outline: none;
-}
-
-/* Ensure barcode displays cover their respective containers */
-.input-view {
-    position: relative;
-    width: 100%;
-}
-
-
-/* Responsive adjustments */
-@media (max-width: 500px) {
-    .container {
-        padding: 1.5rem;
-    }
-
-    .wheel-column {
-        width: 32px;
-    }
-
-    .wheel-item {
-        font-size: 1rem;
-    }
-}
-
-.barcode-active-display {
-    display: none;
-    width: 100%;
-    height: 100%;
+    min-height: 150px;
+    /* Match wheel height for consistency */
     align-items: center;
-    justify-content: center;
-    background: white;
-    z-index: 20;
-    /* Ensure on top */
-}
-
-.barcode-active-display img {
-    max-width: 90%;
-    height: 80px;
-    object-fit: contain;
+    /* Center inputs vertically */
 }
