@@ -52,18 +52,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function syncAllToWheels() {
-        // Copy values from Manual Inputs to Wheels (and Hybrid Inputs)
+        // Copy values from Manual Inputs to Wheels
         manualInputs.forEach((mInput, i) => {
             const val = mInput.value.toUpperCase();
             if (val) {
                 const wheel = document.getElementById(`wheel-${i}`);
-                // Find item
                 const items = Array.from(wheel.querySelectorAll('.wheel-item'));
-                const targetItem = items.find(item => item.getAttribute('data-value') === val);
-                if (targetItem) {
-                    const itemIndex = items.indexOf(targetItem);
-                    wheel.scrollTop = itemIndex * 40;
-                    hybridInputs[i].value = val;
+                // There are 5 copies of each char.
+                const total = items.length;
+                const oneSetLength = total / 5;
+
+                // Find match in first set to get relative index
+                const firstSet = items.slice(0, oneSetLength);
+                const relativeItem = firstSet.find(item => item.getAttribute('data-value') === val);
+
+                if (relativeItem) {
+                    const relativeIndex = firstSet.indexOf(relativeItem);
+                    // Target Index = Set 2 Start + relativeIndex
+                    const targetIndex = (oneSetLength * 2) + relativeIndex;
+                    wheel.scrollTop = targetIndex * 40;
                 }
             }
         });
@@ -167,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. Manual Input Type -> Update Wheel + Hybrid
+    // 3. Manual Input Type -> Update Wheel
     manualInputs.forEach(mInput => {
         mInput.addEventListener('input', (e) => {
             e.target.value = e.target.value.toUpperCase(); // Force upper
@@ -180,12 +187,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (hInput) hInput.value = val;
 
-            // Find item
+            // Logic repeated from syncAllToWheels
             const items = Array.from(wheel.querySelectorAll('.wheel-item'));
-            const targetItem = items.find(item => item.getAttribute('data-value') === val);
-            if (targetItem) {
-                const itemIndex = items.indexOf(targetItem);
-                wheel.scrollTop = itemIndex * 40;
+            const total = items.length;
+            const oneSetLength = total / 5;
+
+            const firstSet = items.slice(0, oneSetLength);
+            const relativeItem = firstSet.find(item => item.getAttribute('data-value') === val);
+
+            if (relativeItem) {
+                const relativeIndex = firstSet.indexOf(relativeItem);
+                const targetIndex = (oneSetLength * 2) + relativeIndex;
+                wheel.scrollTop = targetIndex * 40;
             }
 
             // Auto-focus next
@@ -404,8 +417,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Initial scroll setup
+    // Initialize Wheels with Infinite Scroll Buffer
+    const ITEM_HEIGHT = 40;
+
     wheels.forEach(wheel => {
-        wheel.scrollTop = 0;
+        const originalItems = Array.from(wheel.querySelectorAll('.wheel-item'));
+
+        // Remove padding divs as they mess up math
+        wheel.querySelectorAll('.wheel-padding').forEach(el => el.remove());
+
+        // Create buffer: [Clones] [Clones] [Original] [Clones] [Clones]
+        const fragmentHover = document.createDocumentFragment();
+        const fragmentBottom = document.createDocumentFragment();
+
+        // Top Clones (2 sets)
+        originalItems.forEach(item => fragmentHover.appendChild(item.cloneNode(true)));
+        originalItems.forEach(item => fragmentHover.appendChild(item.cloneNode(true)));
+
+        // Bottom Clones (2 sets)
+        originalItems.forEach(item => fragmentBottom.appendChild(item.cloneNode(true)));
+        originalItems.forEach(item => fragmentBottom.appendChild(item.cloneNode(true)));
+
+        wheel.insertBefore(fragmentHover, wheel.firstChild);
+        wheel.appendChild(fragmentBottom);
+
+        // Initial Scroll to Center (Original Set)
+        // Original set starts at index = length * 2
+        const totalItemsPerSet = originalItems.length;
+        const startOffset = (totalItemsPerSet * 2) * ITEM_HEIGHT;
+
+        wheel.scrollTop = startOffset;
+
+        // Attach Logic for Loop
+        wheel.dataset.originalLength = totalItemsPerSet;
+        wheel.dataset.setHeight = totalItemsPerSet * ITEM_HEIGHT;
+    });
+
+    // Handle Infinite Scroll Teleportation
+    wheels.forEach(wheel => {
+        wheel.addEventListener('scroll', () => {
+            const scrollTop = wheel.scrollTop;
+            const setHeight = parseInt(wheel.dataset.setHeight);
+
+            // The full virtual height is roughly SetHeight * 5.
+            // We want to stay roughly in the middle (Set 2).
+            // If we go above Set 1 (scrollTop < SetHeight), jump to Set 3.
+            // If we go below Set 3 (scrollTop > SetHeight*4), jump to Set 1?
+
+            // Simplest Center-Lock:
+            // Center Zone Start = SetHeight * 2. 
+            // If scrollTop < SetHeight, add (SetHeight * 2).
+            // If scrollTop > SetHeight * 4, subtract (SetHeight * 2).
+
+            if (scrollTop < setHeight) {
+                wheel.scrollTop = scrollTop + (setHeight * 2);
+            } else if (scrollTop > (setHeight * 4)) {
+                wheel.scrollTop = scrollTop - (setHeight * 2);
+            }
+        });
     });
 });

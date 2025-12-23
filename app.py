@@ -17,15 +17,16 @@ def validate():
     data = request.json
     nric = data.get('nric', '').upper()
     
-    is_valid, message = validate_nric(nric)
+    validation_result = validate_nric(nric)
     
     response = {
-        'valid': is_valid,
-        'message': message,
-        'barcode': None
+        'valid': validation_result['valid'],
+        'message': validation_result['message'],
+        'barcode': None,
+        'expected': validation_result.get('expected') 
     }
     
-    if is_valid:
+    if validation_result['valid']:
         barcode_b64 = generate_barcode_base64(nric)
         if barcode_b64:
             response['barcode'] = f"data:image/png;base64,{barcode_b64}"

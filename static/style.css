@@ -121,6 +121,23 @@ p.subtitle {
     /* Chrome Safari */
 }
 
+.manual-input {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    flex: 0 0 40px !important;
+    height: 40px !important;
+    /* SQUARE */
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
 .wheel-item {
     height: 40px;
     display: flex;

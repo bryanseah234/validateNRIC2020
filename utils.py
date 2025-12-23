@@ -70,9 +70,13 @@ def validate_nric(nric):
         calculated_char = m_map.get(check_digit)
 
     if last_char == calculated_char:
-        return True, f"Valid {first_char}-series NRIC."
+        return {"valid": True, "message": f"Valid {first_char}-series NRIC."}
     else:
-        return False, f"Invalid NRIC. Last character should be {calculated_char if calculated_char else '?'}"
+        return {
+            "valid": False,
+            "message": "Invalid NRIC.",
+            "expected": calculated_char
+        }
 
 def generate_barcode_base64(nric):
     """
