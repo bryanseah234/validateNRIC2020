@@ -10,11 +10,11 @@ def validate_nric(nric):
     Returns a tuple (is_valid, message).
     """
     if not nric or len(nric) != 9:
-        return False, "NRIC must be exactly 9 characters."
+        return {"valid": False, "message": "NRIC must be exactly 9 characters."}
     
     nric = nric.upper()
     if not re.match(r'^[STFGM]\d{7}[A-Z]$', nric):
-        return False, "Invalid NRIC format. Format should be: @0000000#"
+        return {"valid": False, "message": "Invalid NRIC format. Format should be: @0000000#"}
     
     first_char = nric[0]
     digits = nric[1:8]
