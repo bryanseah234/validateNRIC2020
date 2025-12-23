@@ -1,20 +1,28 @@
 :root {
-    --bg-color: #0f172a;
-    --card-bg: #1e293b;
-    --primary-color: #14b8a6; /* Teal */
-    --accent-color: #2dd4bf; 
-    --text-color: #f8fafc;
-    --muted-color: #94a3b8;
+    --bg-color: #f3f4f6;
+    /* Light Grey */
+    --card-bg: #ffffff;
+    /* White */
+    --text-color: #1f2937;
+    /* Dark Grey */
+    --muted-color: #9ca3af;
+    /* Silver/Grey */
+    --wheel-bg: #e5e7eb;
+    /* Light Grey for unselected */
+    --selected-bg: #d1d5db;
+    /* Slightly darker for selection */
+    --success-color: #10b981;
+    /* Green (kept for valid state) */
     --error-color: #ef4444;
-    --success-color: #22c55e; /* Neon Green */
-    --input-bg: #334155;
-    --input-focus: #0f766e;
+    /* Red (kept for error) */
+    --accent-color: #374151;
+    /* Dark Grey Accent */
 }
 
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    font-family: 'inter', sans-serif;
+    font-family: 'Inter', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -24,89 +32,139 @@ body {
 
 .container {
     background-color: var(--card-bg);
-    padding: 3rem;
-    border-radius: 20px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    padding: 2rem;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     text-align: center;
-    max-width: 600px;
-    width: 90%;
-    border: 1px solid #334155;
-    animation: fadeIn 0.8s ease-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    max-width: 700px;
+    width: 95%;
+    border: 1px solid #e5e7eb;
 }
 
 .logo-container {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .logo {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.4);
+    filter: grayscale(100%);
+    /* Make logo monochromatic */
 }
 
 h1 {
     font-weight: 700;
     margin-bottom: 0.5rem;
-    background: linear-gradient(to right, var(--primary-color), var(--success-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 2.5rem;
+    color: var(--text-color);
+    font-size: 2rem;
 }
 
 p.subtitle {
     color: var(--muted-color);
-    margin-bottom: 2.5rem;
-}
-
-.nric-inputs {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
     margin-bottom: 2rem;
-    flex-wrap: wrap; /* allow wrapping on small screens if needed, though 9 chars usually fit */
 }
 
-.nric-char {
-    width: 45px;
-    height: 60px;
-    font-size: 1.5rem;
+/* Wheel Component Styles */
+.wheel-group-container {
+    display: flex;
+    justify-content: center;
+    height: 150px;
+    /* Visible height (approx 3 items) */
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(to bottom, #ffffff 0%, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0) 80%, #ffffff 100%);
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    background-color: #f9fafb;
+}
+
+.selection-overlay {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 40px;
+    /* Height of one item */
+    margin-top: -20px;
+    background-color: rgba(0, 0, 0, 0.04);
+    pointer-events: none;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 10;
+}
+
+.wheel-column {
+    width: 40px;
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
+    position: relative;
+    z-index: 5;
     text-align: center;
-    background-color: var(--input-bg);
-    border: 2px solid transparent;
-    border-radius: 8px;
-    color: var(--text-color);
-    outline: none;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    font-weight: bold;
 }
 
-.nric-char:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);
+.wheel-column::-webkit-scrollbar {
+    display: none;
+    /* Chrome Safari */
+}
+
+.wheel-item {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--muted-color);
+    scroll-snap-align: center;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+}
+
+/* Highlight center item (handled by JS via intersection observer usually, or just visually by position) 
+   But pure CSS specific highlighting in a scroll container is checking 'scroll-snap-align'. 
+   We will depend on JS to add a class 'active' for perfect styling if needed, 
+   but for now let's use the overlay to indicate selection.
+*/
+
+.wheel-padding {
+    height: 55px;
+    /* (Container Height - Item Height) / 2 = (150 - 40) / 2 = 55 */
+}
+
+.action-button {
+    background-color: var(--text-color);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    font-weight: 600;
+    width: 100%;
+    max-width: 200px;
+}
+
+.action-button:hover {
+    background-color: #374151;
+    /* Lighter grey */
     transform: translateY(-2px);
 }
 
-.nric-char.valid {
-    border-color: var(--success-color);
-    color: var(--success-color);
-}
-
-.nric-char.invalid {
-    border-color: var(--error-color);
-    color: var(--error-color);
+.action-button:active {
+    transform: translateY(0);
 }
 
 #result-container {
     margin-top: 2rem;
-    min-height: 120px;
-    transition: opacity 0.3s;
+    min-height: 100px;
 }
 
 .status-message {
@@ -117,7 +175,6 @@ p.subtitle {
 
 .valid-text {
     color: var(--success-color);
-    text-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
 }
 
 .invalid-text {
@@ -125,29 +182,49 @@ p.subtitle {
 }
 
 .barcode-wrapper {
-    background: white;
+    margin-top: 1rem;
     padding: 10px;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
+    background: white;
     display: inline-block;
 }
 
 .barcode-wrapper img {
-    display: block;
     max-width: 100%;
     height: auto;
+    filter: grayscale(100%);
+    /* Monochromatic barcode */
 }
 
-/* Spin animation for loading state if needed */
-.spinner {
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255,255,255,0.3);
-    border-radius: 50%;
-    border-top-color: var(--primary-color);
-    animation: spin 1s ease-in-out infinite;
-    margin: 0 auto;
+/* Responsive adjustments */
+@media (max-width: 500px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    .wheel-column {
+        width: 32px;
+    }
+
+    .wheel-item {
+        font-size: 1rem;
+    }
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.barcode-active-display {
+    display: none;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    z-index: 20;
+    /* Ensure on top */
+}
+
+.barcode-active-display img {
+    max-width: 90%;
+    height: 80px;
+    object-fit: contain;
 }
