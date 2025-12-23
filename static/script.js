@@ -18,6 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
 
+            // Clear status message when switching tabs
+            statusMessage.textContent = '';
+            statusMessage.className = 'status-message';
+
             // Switch View
             const target = tab.getAttribute('data-tab');
             currentMode = target;
@@ -29,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 syncAllToWheels();
             } else {
                 document.getElementById('manual-view').style.display = 'block';
-                // Wheel inputs are already synced to wheel data, need to sync Wheel -> Manual
-                syncAllToManual();
+                // Clear manual inputs so user starts fresh with placeholders
+                manualInputs.forEach(input => input.value = '');
             }
         });
     });
@@ -251,10 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper to get selected value from a wheel
     function getSelectedValue(wheel) {
         const itemHeight = 40;
-        const scrollTop = wheel.scrollTop;
-        // The index is roughly scrollTop / itemHeight
-        // snap behavior ensures it lands on an integer multiple
-        const index = Math.round(scrollTop / itemHeight);
+        const containerHeight = 150;
+        // The visual center is at scrollTop + (containerHeight/2 - itemHeight/2)
+        // = scrollTop + 55
+        const centerOffset = (containerHeight - itemHeight) / 2; // 55
+        const centerScrollPosition = wheel.scrollTop + centerOffset;
+        const index = Math.round(centerScrollPosition / itemHeight);
 
         const items = wheel.querySelectorAll('.wheel-item');
         if (index >= 0 && index < items.length) {
