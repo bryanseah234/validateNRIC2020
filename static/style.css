@@ -380,20 +380,25 @@ p.subtitle {
 
 @media (max-width: 450px) {
     .manual-input {
-        width: 20px !important;
-        height: 40px !important;
-        flex: 0 0 20px !important;
-        max-width: 20px !important;
-        min-width: 20px !important;
-        font-size: 0.95rem;
-        border-radius: 5px;
+        /* Calculate width: (viewport - container padding - gaps) / 9 inputs */
+        /* 100vw - 32px padding - 16px gaps (8 * 2px) = available space / 9 */
+        --input-width: calc((100vw - 48px) / 9);
+        width: var(--input-width) !important;
+        min-width: var(--input-width) !important;
+        max-width: var(--input-width) !important;
+        flex: 0 0 var(--input-width) !important;
+        height: 44px !important;
+        font-size: clamp(0.85rem, 3vw, 1.1rem);
+        border-radius: 6px;
         padding: 0 !important;
     }
 
     .manual-group-container {
         gap: 2px;
         min-height: 120px;
-        padding: 0 8px;
+        padding: 0 16px;
+        box-sizing: border-box;
+        width: 100%;
     }
 
     /* Fill the entire viewport on mobile - no visible card box */
