@@ -74,20 +74,16 @@
         <!-- View 2: Manual OTP Input -->
         <div id="manual-view" class="input-view" style="display: none;">
             <div class="manual-group-container">
-                <!-- Independent Manual Inputs -->
-                <input type="text" class="manual-input manual-input-sync" data-index="0" maxlength="1" placeholder="S">
+                <!-- First input: Letter prefix (S/T/F/G/M) -->
+                <input type="text" class="manual-input manual-input-sync" data-index="0" maxlength="1" placeholder="S" inputmode="text" pattern="[STFGMstfgm]">
+                <!-- Middle 7 inputs: Numbers only -->
                 {% for i in range(1, 8) %}
                 <input type="text" class="manual-input manual-input-sync safe-numeric" data-index="{{ i }}"
-                    maxlength="1" placeholder="0">
+                    maxlength="1" placeholder="0" inputmode="numeric" pattern="[0-9]">
                 {% endfor %}
-                <input type="text" class="manual-input manual-input-sync" data-index="8" maxlength="1" placeholder="A">
+                <!-- Last input: Letter suffix -->
+                <input type="text" class="manual-input manual-input-sync" data-index="8" maxlength="1" placeholder="A" inputmode="text" pattern="[A-Za-z]">
             </div>
-            <!-- Barcode Display for Manual View (Or we toggle the main one? Better to reuse a common result area or swap views) -->
-            <!-- User said "Ending screen shld be the same for both views" -->
-            <!-- So we will use the common Result container or overlay the manual inputs too. -->
-            <!-- Since Wheel view has an embedded barcode display inside 'wheelGroup', we might want to replicate that or move it out. -->
-            <!-- Moving it out is cleaner but user liked it 'filling the rectangle'. -->
-            <!-- Let's put a similar barcode container inside manual-group-container for consistency. -->
             <div id="barcodeActiveDisplayManual" class="barcode-active-display" style="display:none;"></div>
         </div>
 
