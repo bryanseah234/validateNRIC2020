@@ -1,3 +1,3 @@
-flask
-python-barcode
-pillow
+Flask==3.1.3
+python-barcode==0.16.1
+Pillow==12.2.0
